@@ -40,7 +40,5 @@ CREATE TABLE user (
 2. Display — list.php returns all rows as JSON, rendered into the table.
 3. Toggle — clicking "Toggle" calls toggle.php, which flips the status in the database and updates the page instantly.
 <img width="1366" height="768" alt="database" src="https://github.com/user-attachments/assets/7e930a6b-4a69-4637-9bbe-6ed1a6a3ac82" />
-
-  
 2. Display — list.php returns all rows as JSON, rendered into the table.
 3. Toggle — clicking "Toggle" calls toggle.php, which flips the status in the database and updates the page instantly.
