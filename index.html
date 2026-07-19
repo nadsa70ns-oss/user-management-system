@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>User Records</title>
+</head>
+<body>
+
+<h2>HTML Forms</h2>
+
+<form id="userForm">
+    <label for="name">الاسم:</label><br>
+    <input type="text" id="name" name="name" placeholder="اسمك"><br>
+
+    <label for="age">العمر:</label><br>
+    <input type="text" id="age" name="age" placeholder="عمرك"><br><br>
+
+    <input type="submit" value="Submit">
+</form>
+
+<p id="msg"></p>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="userTableBody">
+        <!-- Rows are inserted here automatically by JavaScript -->
+    </tbody>
+</table>
+
+<script>
+// ==========================================
+// 1) Load all records and render them in the table
+// ==========================================
+function loadData() {
+    fetch('list.php')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = ''; // clear the table before re-rendering it
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.id}</td>
+                    <td>${row.name}</td>
+                    <td>${row.age}</td>
+                    <td id="status-${row.id}">${row.status}</td>
+                    <td>
+                        <button onclick="toggleStatus(${row.id})">
+                            Toggle
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error('Error loading data:', err));
+}
+
+// ==========================================
+// 2) Submit the form without a page refresh
+// ==========================================
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // stop the default form submission
+
+    const name = document.getElementById('name').value.trim();
+    const age  = document.getElementById('age').value.trim();
+    const msg  = document.getElementById('msg');
+
+    if (name === '' || age === '') {
+        msg.textContent = 'Please fill in both name and age';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('age', age);
+
+    fetch('save.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        msg.textContent = data.message;
+        if (data.success) {
+            document.getElementById('userForm').reset();
+            loadData(); // refresh the table immediately
+        }
+    })
+    .catch(err => console.error('Error saving data:', err));
+});
+
+// ==========================================
+// 3) Toggle the status without a page refresh
+// ==========================================
+function toggleStatus(id) {
+    const formData = new FormData();
+    formData.append('id', id);
+
+    fetch('toggle.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // update the cell instantly instead of reloading the whole table
+            document.getElementById('status-' + id).textContent = data.newStatus;
+        }
+    })
+    .catch(err => console.error('Error toggling status:', err));
+}
+
+// ==========================================
+// Load the data as soon as the page opens
+// ==========================================
+loadData();
+</script>
+
+</body>
+</html>
